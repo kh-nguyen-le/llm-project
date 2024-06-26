@@ -1,0 +1,5 @@
+requests
+dill
+pandas
+llama-index
+openai

@@ -3,6 +3,8 @@ import sys
 import pandas as pd
 import sqlalchemy
 
+TABLE_NAME = "Cards"
+
 def create_database():
   if not init.data_exists():
     if init.save_card_data():
@@ -21,7 +23,7 @@ def _create_database():
   df = df.drop(columns=['card_sets', 'card_images', 'card_prices', 'pend_desc', 'monster_desc', 'scale', 'linkval', 'linkmarkers', 'banlist_info'])
   engine = sqlalchemy.create_engine("sqlite+pysqlite:///:memory:", echo=True)
   metadata_obj = sqlalchemy.MetaData()
-  table = sqlalchemy.Table('Cards', metadata_obj,
+  table = sqlalchemy.Table(TABLE_NAME, metadata_obj,
                            sqlalchemy.Column("index", sqlalchemy.Integer, primary_key=True),
                            sqlalchemy.Column("id", sqlalchemy.Integer),
                            sqlalchemy.Column("name", sqlalchemy.String),
@@ -37,5 +39,5 @@ def _create_database():
                            sqlalchemy.Column("attribute", sqlalchemy.String),
                            )
   metadata_obj.create_all(engine)
-  df.to_sql('Cards', engine, if_exists='append')
+  df.to_sql(TABLE_NAME, engine, if_exists='append')
   return engine

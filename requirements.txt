@@ -4,3 +4,4 @@ pandas
 llama-index
 llama-index-llms-ollama
 openai
+streamlit

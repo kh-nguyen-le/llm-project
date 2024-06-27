@@ -12,6 +12,10 @@ sql_database = SQLDatabase(engine, include_tables=[database.TABLE_NAME])
 
 query_engine = NLSQLTableQueryEngine(sql_database, llm, tables=[database.TABLE_NAME], streaming=True)
 
+def stream_wrapper(gen):
+    for token in gen:
+        yield str(token)
+
 if "messages" not in st.session_state:
   st.session_state.messages = [
       {"role": "assistant", "content": "Ask a Question about the YuGiOh card game!"}
@@ -30,5 +34,5 @@ if prompt := st.chat_input("Question: "):
         with st.spinner("Thinking..."):
             with st.chat_message("assistant"):
                 stream = query_engine.query(prompt)
-                response = st.write(stream.response_gen)
+                response = st.write_stream(stream_wrapper(stream.response_gen))
             st.session_state.messages.append({"role": "assistant", "content": response})

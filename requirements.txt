@@ -2,4 +2,5 @@ requests
 dill
 pandas
 llama-index
+llama-index-llms-ollama
 openai

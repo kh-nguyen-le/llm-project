@@ -20,5 +20,22 @@ def _create_database():
     exit()
   df = df.drop(columns=['card_sets', 'card_images', 'card_prices', 'pend_desc', 'monster_desc', 'scale', 'linkval', 'linkmarkers', 'banlist_info'])
   engine = sqlalchemy.create_engine("sqlite+pysqlite:///:memory:", echo=True)
-  df.to_sql('Cards', engine)
+  metadata_obj = sqlalchemy.MetaData()
+  table = sqlalchemy.Table('Cards', metadata_obj,
+                           sqlalchemy.Column("index", sqlalchemy.Integer, primary_key=True),
+                           sqlalchemy.Column("id", sqlalchemy.Integer),
+                           sqlalchemy.Column("name", sqlalchemy.String),
+                           sqlalchemy.Column("type", sqlalchemy.String),
+                           sqlalchemy.Column("frameType", sqlalchemy.String),
+                           sqlalchemy.Column("desc", sqlalchemy.String),
+                           sqlalchemy.Column("race", sqlalchemy.String),
+                           sqlalchemy.Column("archetype", sqlalchemy.String),
+                           sqlalchemy.Column("ygoprodeck_url", sqlalchemy.String),
+                           sqlalchemy.Column("atk", sqlalchemy.Integer),
+                           sqlalchemy.Column("def", sqlalchemy.Integer),
+                           sqlalchemy.Column("level", sqlalchemy.Integer),
+                           sqlalchemy.Column("attribute", sqlalchemy.String),
+                           )
+  metadata_obj.create_all(engine)
+  df.to_sql('Cards', engine, if_exists='append')
   return engine

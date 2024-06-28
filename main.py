@@ -4,7 +4,7 @@ from llama_index.llms.ollama import Ollama
 from llama_index.core.query_engine import NLSQLTableQueryEngine
 import streamlit as st
 
-llm = Ollama(model="llama3", streaming=True)
+llm = Ollama(model="llama3", request_timeout=120.0, streaming=True)
 
 engine = database.create_database()
 

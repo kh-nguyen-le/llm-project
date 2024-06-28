@@ -17,6 +17,7 @@ def create_database():
 
 def _create_database():
   df = init.load_dataframe()
+  df = df.rename(columns={"race": "subtype"})
   if df is None:
     sys.stderr.write("Error unpickling")
     exit()
@@ -30,7 +31,7 @@ def _create_database():
                            sqlalchemy.Column("type", sqlalchemy.String),
                            sqlalchemy.Column("frameType", sqlalchemy.String),
                            sqlalchemy.Column("desc", sqlalchemy.String),
-                           sqlalchemy.Column("race", sqlalchemy.String),
+                           sqlalchemy.Column("subtype", sqlalchemy.String),
                            sqlalchemy.Column("archetype", sqlalchemy.String),
                            sqlalchemy.Column("ygoprodeck_url", sqlalchemy.String),
                            sqlalchemy.Column("atk", sqlalchemy.Integer),

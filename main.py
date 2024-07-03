@@ -13,9 +13,9 @@ engine = database.create_database()
 
 sql_database = SQLDatabase(engine, include_tables=[database.TABLE_NAME])
 
-nl_sql_retriever = NLSQLRetriever(sql_database, tables=[database.TABLE_NAME])
+nl_sql_retriever = NLSQLRetriever(sql_database, tables=[database.TABLE_NAME], llm=llm)
 
-query_engine = RetrieverQueryEngine(nl_sql_retriever)
+query_engine = RetrieverQueryEngine.from_args(nl_sql_retriever, llm=llm)
 
 query_engine_tools = [
     QueryEngineTool(

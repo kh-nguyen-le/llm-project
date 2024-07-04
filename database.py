@@ -17,7 +17,8 @@ def create_database():
 
 def _create_database():
   df = init.load_dataframe()
-  df = df.rename(columns={"race": "subtype"})
+  df = df.rename(columns={"race": "subtype",
+                          "desc": "text"})
   if df is None:
     sys.stderr.write("Error unpickling")
     exit()
@@ -40,5 +41,5 @@ def _create_database():
                            sqlalchemy.Column("attribute", sqlalchemy.String),
                            )
   metadata_obj.create_all(engine)
-  df.to_sql(TABLE_NAME, engine, if_exists='append')
+  df.to_sql(TABLE_NAME, engine, if_exists='replace')
   return engine

@@ -39,6 +39,7 @@ agent = ReActAgent.from_tools(
     query_engine_tools,
     llm=llm,
     verbose=True,
+    max_iterations=100,
     context=context
 )
 

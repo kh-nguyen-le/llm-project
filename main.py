@@ -1,8 +1,7 @@
 import database
 from llama_index.core import SQLDatabase
 from llama_index.llms.ollama import Ollama
-from llama_index.core.query_engine import RetrieverQueryEngine
-from llama_index.core.retrievers import NLSQLRetriever
+from llama_index.core.query_engine import NLSQLTableQueryEngine
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
 from llama_index.core.agent import ReActAgent
 from llama_index.core.base.llms.types import ChatMessage, MessageRole
@@ -16,9 +15,9 @@ engine = database.create_database()
 
 sql_database = SQLDatabase(engine, include_tables=[database.TABLE_NAME])
 
-nl_sql_retriever = NLSQLRetriever(sql_database, tables=[database.TABLE_NAME], llm=llm)
-
-query_engine = RetrieverQueryEngine.from_args(nl_sql_retriever, llm=llm)
+query_engine = NLSQLTableQueryEngine(sql_database=sql_database, 
+                                     llm=llm, tables=[database.TABLE_NAME],
+                                     verbose=True)
 
 query_engine_tools = [
     QueryEngineTool(

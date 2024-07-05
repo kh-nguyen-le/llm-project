@@ -31,7 +31,7 @@ def _create_database():
                            sqlalchemy.Column("name", sqlalchemy.String),
                            sqlalchemy.Column("type", sqlalchemy.String),
                            sqlalchemy.Column("frameType", sqlalchemy.String),
-                           sqlalchemy.Column("desc", sqlalchemy.String),
+                           sqlalchemy.Column("text", sqlalchemy.String),
                            sqlalchemy.Column("subtype", sqlalchemy.String),
                            sqlalchemy.Column("archetype", sqlalchemy.String),
                            sqlalchemy.Column("ygoprodeck_url", sqlalchemy.String),

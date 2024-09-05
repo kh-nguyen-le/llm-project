@@ -3,5 +3,5 @@ dill
 pandas
 llama-index
 llama-index-llms-ollama
-openai
+llama-index-embeddings-ollama
 streamlit

@@ -1,5 +1,7 @@
+from llama_index.embeddings.ollama import OllamaEmbedding
+
 import database
-from llama_index.core import SQLDatabase
+from llama_index.core import SQLDatabase, Settings
 from llama_index.llms.ollama import Ollama
 from llama_index.core.query_engine import NLSQLTableQueryEngine
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
@@ -11,13 +13,15 @@ import streamlit as st
 
 llm = Ollama(model="llama3", request_timeout=300.0, streaming=True)
 
+embed = OllamaEmbedding(model_name="nomic-embed-text")
+
 engine = database.create_database()
 
 sql_database = SQLDatabase(engine, include_tables=[database.TABLE_NAME])
 
 query_engine = NLSQLTableQueryEngine(sql_database=sql_database, 
                                      llm=llm, tables=[database.TABLE_NAME],
-                                     verbose=True)
+                                     embed_model=embed, verbose=True)
 
 query_engine_tools = [
     QueryEngineTool(
@@ -25,7 +29,7 @@ query_engine_tools = [
         metadata=ToolMetadata(
             name="ygo_card_db",
             description=(
-                "Provides information about every YuGiOh card up to June 2024. "
+                "Provides information about every YuGiOh card since last update."
                 "Use a detailed plain text question as input to the tool."
             ),
         ),

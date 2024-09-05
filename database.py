@@ -17,24 +17,28 @@ def create_database():
 
 def _create_database():
   df = init.load_dataframe()
-  df = df.rename(columns={"race": "subtype",
-                          "desc": "text"})
   if df is None:
     sys.stderr.write("Error unpickling")
     exit()
   df = df.drop(columns=['card_sets', 'card_images', 'card_prices', 'pend_desc', 'monster_desc', 'scale', 'linkval', 'linkmarkers', 'banlist_info'])
+  df = df.astype({
+      'typeline': 'str'
+  },
+  errors='ignore')
   engine = sqlalchemy.create_engine("sqlite+pysqlite:///:memory:", echo=True)
   metadata_obj = sqlalchemy.MetaData()
   table = sqlalchemy.Table(TABLE_NAME, metadata_obj,
                            sqlalchemy.Column("index", sqlalchemy.Integer, primary_key=True),
                            sqlalchemy.Column("id", sqlalchemy.Integer),
                            sqlalchemy.Column("name", sqlalchemy.String),
-                           sqlalchemy.Column("type", sqlalchemy.String),
+                           sqlalchemy.Column('type', sqlalchemy.String),
+                           sqlalchemy.Column("humanReadableType", sqlalchemy.String),
                            sqlalchemy.Column("frameType", sqlalchemy.String),
-                           sqlalchemy.Column("text", sqlalchemy.String),
-                           sqlalchemy.Column("subtype", sqlalchemy.String),
+                           sqlalchemy.Column("desc", sqlalchemy.String),
+                           sqlalchemy.Column("race", sqlalchemy.String),
                            sqlalchemy.Column("archetype", sqlalchemy.String),
                            sqlalchemy.Column("ygoprodeck_url", sqlalchemy.String),
+                           sqlalchemy.Column("typeline", sqlalchemy.String),
                            sqlalchemy.Column("atk", sqlalchemy.Integer),
                            sqlalchemy.Column("def", sqlalchemy.Integer),
                            sqlalchemy.Column("level", sqlalchemy.Integer),

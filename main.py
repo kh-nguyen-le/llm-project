@@ -11,17 +11,17 @@ from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.core.memory import ChatMemoryBuffer
 import streamlit as st
 
-llm = Ollama(model="llama3", request_timeout=300.0, streaming=True)
+Settings.llm = Ollama(model="llama3.1", request_timeout=300.0, streaming=True)
 
-embed = OllamaEmbedding(model_name="nomic-embed-text")
+Settings.embed_model = OllamaEmbedding(model_name="nomic-embed-text")
 
 engine = database.create_database()
 
 sql_database = SQLDatabase(engine, include_tables=[database.TABLE_NAME])
 
 query_engine = NLSQLTableQueryEngine(sql_database=sql_database, 
-                                     llm=llm, tables=[database.TABLE_NAME],
-                                     embed_model=embed, verbose=True)
+                                     tables=[database.TABLE_NAME],
+                                     verbose=True)
 
 query_engine_tools = [
     QueryEngineTool(
@@ -58,14 +58,12 @@ chat_store = SimpleChatStore()
 
 chat_memory = ChatMemoryBuffer.from_defaults(
     chat_history=st.session_state.messages,
-    llm=llm,
     chat_store=chat_store,
     chat_store_key="user"
     )
 
 agent = ReActAgent.from_tools(
     query_engine_tools,
-    llm=llm,
     verbose=True,
     max_iterations=100,
     context=context,

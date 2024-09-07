@@ -20,7 +20,7 @@ def _create_database():
   if df is None:
     sys.stderr.write("Error unpickling")
     exit()
-  df = df.drop(columns=['card_sets', 'card_images', 'card_prices', 'pend_desc', 'monster_desc', 'scale', 'linkval', 'linkmarkers', 'banlist_info'])
+  df = df.drop(columns=['card_sets', 'card_images', 'card_prices', 'pend_desc', 'monster_desc', 'linkmarkers', 'banlist_info'])
   df = df.astype({
       'typeline': 'str'
   },
@@ -32,7 +32,7 @@ def _create_database():
                            sqlalchemy.Column("id", sqlalchemy.Integer),
                            sqlalchemy.Column("name", sqlalchemy.String),
                            sqlalchemy.Column('type', sqlalchemy.String),
-                           sqlalchemy.Column("humanReadableType", sqlalchemy.String),
+                           sqlalchemy.Column("humanReadableCardType", sqlalchemy.String),
                            sqlalchemy.Column("frameType", sqlalchemy.String),
                            sqlalchemy.Column("desc", sqlalchemy.String),
                            sqlalchemy.Column("race", sqlalchemy.String),
@@ -42,6 +42,8 @@ def _create_database():
                            sqlalchemy.Column("atk", sqlalchemy.Integer),
                            sqlalchemy.Column("def", sqlalchemy.Integer),
                            sqlalchemy.Column("level", sqlalchemy.Integer),
+                           sqlalchemy.Column("scale", sqlalchemy.Integer),
+                           sqlalchemy.Column("linkval", sqlalchemy.Integer),
                            sqlalchemy.Column("attribute", sqlalchemy.String),
                            )
   metadata_obj.create_all(engine)

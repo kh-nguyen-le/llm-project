@@ -11,7 +11,7 @@ from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.core.memory import ChatMemoryBuffer
 import streamlit as st
 
-Settings.llm = Ollama(model="llama3.1", request_timeout=300.0, streaming=True)
+Settings.llm = Ollama(model="gemma2", request_timeout=300.0, streaming=True)
 
 Settings.embed_model = OllamaEmbedding(model_name="nomic-embed-text")
 
@@ -19,7 +19,7 @@ engine = database.create_database()
 
 sql_database = SQLDatabase(engine, include_tables=[database.TABLE_NAME])
 
-query_engine = NLSQLTableQueryEngine(sql_database=sql_database, 
+query_engine = NLSQLTableQueryEngine(sql_database=sql_database,
                                      tables=[database.TABLE_NAME],
                                      verbose=True)
 
@@ -30,7 +30,8 @@ query_engine_tools = [
             name="ygo_card_db",
             description=(
                 "Provides information about every YuGiOh card since last update."
-                "Use a detailed plain text question as input to the tool."
+                "Used for translating a natural language query into SQL over a table"
+                "containing the data of each card including name and description."
             ),
         ),
     )
@@ -39,6 +40,7 @@ query_engine_tools = [
 context = """
 You are an expert on the YuGiOh Card game.
 You will answer questions about cards used in the game from a technical perspective.
+You must use tools when specific card names are mentioned.
 """
 
 

@@ -1,3 +1,4 @@
+from llama_index.core.node_parser import SemanticSplitterNodeParser
 from llama_index.embeddings.ollama import OllamaEmbedding
 
 import database
@@ -9,6 +10,7 @@ from llama_index.core.agent import ReActAgent
 from llama_index.core.base.llms.types import ChatMessage, MessageRole
 from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.core.memory import ChatMemoryBuffer
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 import streamlit as st
 
 Settings.llm = Ollama(model="gemma2", request_timeout=300.0, streaming=True)
@@ -23,6 +25,19 @@ query_engine = NLSQLTableQueryEngine(sql_database=sql_database,
                                      tables=[database.TABLE_NAME],
                                      verbose=True)
 
+reader = SimpleDirectoryReader(input_dir="./docs/rulebook/")
+
+rulebook = reader.load_data()
+
+splitter = SemanticSplitterNodeParser(buffer_size=1, breakpoint_percentile_threshold=95,
+                                      include_metadata=True, embed_model=Settings.embed_model)
+
+nodes = splitter.get_nodes_from_documents(rulebook)
+
+rule_index = VectorStoreIndex(nodes)
+
+rule_qe = rule_index.as_query_engine()
+
 query_engine_tools = [
     QueryEngineTool(
         query_engine,
@@ -34,8 +49,19 @@ query_engine_tools = [
                 "containing the data of each card including name and description."
             ),
         ),
-    )
+    ),
+    QueryEngineTool(
+        rule_qe,
+        metadata=ToolMetadata(
+            name="ygo_rulebook",
+            description=(
+                "Contains latest information on game mechanics and rules for YuGiOh TCG."
+                "Use a detailed plain text question as input to the tool."
+            ),
+        ),
+    ),
 ]
+
 
 context = """
 You are an expert on the YuGiOh Card game.

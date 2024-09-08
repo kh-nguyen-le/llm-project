@@ -5,3 +5,4 @@ llama-index
 llama-index-llms-ollama
 llama-index-embeddings-ollama
 streamlit
+nest-asyncio

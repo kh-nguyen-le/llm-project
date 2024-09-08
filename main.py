@@ -4,7 +4,7 @@ from llama_index.embeddings.ollama import OllamaEmbedding
 import database
 from llama_index.core import SQLDatabase, Settings
 from llama_index.llms.ollama import Ollama
-from llama_index.core.query_engine import NLSQLTableQueryEngine
+from llama_index.core.query_engine import NLSQLTableQueryEngine, SQLJoinQueryEngine, SubQuestionQueryEngine
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
 from llama_index.core.agent import ReActAgent
 from llama_index.core.base.llms.types import ChatMessage, MessageRole
@@ -12,6 +12,10 @@ from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 import streamlit as st
+
+import nest_asyncio
+
+nest_asyncio.apply()
 
 Settings.llm = Ollama(model="gemma2", request_timeout=300.0, streaming=True)
 
@@ -55,18 +59,52 @@ query_engine_tools = [
         metadata=ToolMetadata(
             name="ygo_rulebook",
             description=(
-                "Contains latest information on game mechanics and rules for YuGiOh TCG."
+                "Contains latest information on general game mechanics and rules for YuGiOh TCG."
                 "Use a detailed plain text question as input to the tool."
             ),
         ),
     ),
 ]
 
+sqe = SubQuestionQueryEngine.from_defaults(query_engine_tools)
+
+
+
+tools = [
+    QueryEngineTool(
+        sqe,
+        metadata=ToolMetadata(
+            name="ygo_sqe",
+            description=(
+                "Breaks up questions about YuGiOh into sub queries to run with underlying tools"
+                "and then combine results in order to better answer the question."
+                "Use a detailed plain text question as input to the tool."
+                "Only used by ygo_jqe tool."
+            ),
+        ),
+    ),
+]
+
+jqe = SQLJoinQueryEngine(query_engine_tools[0], tools[0],verbose=True)
+tools.append(
+    QueryEngineTool(
+        jqe,
+        metadata=ToolMetadata(
+            name="ygo_jqe",
+            description=(
+                "Combines insight from the all of previous tools to provide best answer."
+                "Useful for answering interactions between multiple cards and effects."
+                "Use a detailed plain text question as input to the tool."
+            ),
+        ),
+    ),
+)
 
 context = """
 You are an expert on the YuGiOh Card game.
 You will answer questions about cards used in the game from a technical perspective.
 You must use tools when specific card names are mentioned.
+Try searching by card name first.
 """
 
 
@@ -91,7 +129,7 @@ chat_memory = ChatMemoryBuffer.from_defaults(
     )
 
 agent = ReActAgent.from_tools(
-    query_engine_tools,
+    [t for t in query_engine_tools + tools],
     verbose=True,
     max_iterations=100,
     context=context,

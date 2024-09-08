@@ -66,7 +66,7 @@ query_engine_tools = [
     ),
 ]
 
-sqe = SubQuestionQueryEngine.from_defaults(query_engine_tools)
+sqe = SubQuestionQueryEngine.from_defaults(query_engine_tools, verbose=True)
 
 
 
@@ -79,7 +79,7 @@ tools = [
                 "Breaks up questions about YuGiOh into sub queries to run with underlying tools"
                 "and then combine results in order to better answer the question."
                 "Use a detailed plain text question as input to the tool."
-                "Only used by ygo_jqe tool."
+                "Used internally by ygo_jqe tool."
             ),
         ),
     ),
@@ -92,8 +92,10 @@ tools.append(
         metadata=ToolMetadata(
             name="ygo_jqe",
             description=(
-                "Combines insight from the all of previous tools to provide best answer."
+                "Prioritize this tool first."
+                "Utilizes all of previous tools to provide best answer."
                 "Useful for answering interactions between multiple cards and effects."
+                "As well as for answering complex questions in general."
                 "Use a detailed plain text question as input to the tool."
             ),
         ),
@@ -104,7 +106,7 @@ context = """
 You are an expert on the YuGiOh Card game.
 You will answer questions about cards used in the game from a technical perspective.
 You must use tools when specific card names are mentioned.
-Try searching by card name first.
+Try searching for card description first.
 """
 
 

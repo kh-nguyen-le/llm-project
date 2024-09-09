@@ -1,8 +1,7 @@
 from llama_index.core.node_parser import SemanticSplitterNodeParser
 from llama_index.embeddings.ollama import OllamaEmbedding
-
 import database
-from llama_index.core import SQLDatabase, Settings
+from llama_index.core import SQLDatabase, Settings, StorageContext, load_index_from_storage
 from llama_index.llms.ollama import Ollama
 from llama_index.core.query_engine import NLSQLTableQueryEngine, SQLJoinQueryEngine, SubQuestionQueryEngine
 from llama_index.core.tools import QueryEngineTool, ToolMetadata
@@ -11,6 +10,7 @@ from llama_index.core.base.llms.types import ChatMessage, MessageRole
 from llama_index.core.storage.chat_store import SimpleChatStore
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+import os
 import streamlit as st
 
 import nest_asyncio
@@ -19,7 +19,7 @@ nest_asyncio.apply()
 
 Settings.llm = Ollama(model="gemma2", request_timeout=300.0, streaming=True)
 
-Settings.embed_model = OllamaEmbedding(model_name="nomic-embed-text")
+Settings.embed_model = OllamaEmbedding(model_name="mxbai-embed-large")
 
 engine = database.create_database()
 
@@ -29,18 +29,30 @@ query_engine = NLSQLTableQueryEngine(sql_database=sql_database,
                                      tables=[database.TABLE_NAME],
                                      verbose=True)
 
-reader = SimpleDirectoryReader(input_dir="./docs/rulebook/")
+if os.path.exists("./storage/"):
 
-rulebook = reader.load_data()
+    rule_index = load_index_from_storage((StorageContext.from_defaults(persist_dir="./storage/")))
 
-splitter = SemanticSplitterNodeParser(buffer_size=1, breakpoint_percentile_threshold=95,
-                                      include_metadata=True, embed_model=Settings.embed_model)
+else:
+    reader = SimpleDirectoryReader(input_dir="./docs/rulebook/")
 
-nodes = splitter.get_nodes_from_documents(rulebook)
+    rulebook = reader.load_data()
 
-rule_index = VectorStoreIndex(nodes)
+    splitter = SemanticSplitterNodeParser(buffer_size=1, breakpoint_percentile_threshold=95,
+                                          include_metadata=True, embed_model=Settings.embed_model)
+
+    nodes = splitter.get_nodes_from_documents(rulebook)
+
+    rule_index = VectorStoreIndex(nodes)
+
+    rule_index.storage_context.persist(persist_dir="./storage/")
+
 
 rule_qe = rule_index.as_query_engine()
+
+
+
+
 
 query_engine_tools = [
     QueryEngineTool(
@@ -143,7 +155,7 @@ if prompt := st.chat_input("Question: "):
     st.session_state.messages.append(ChatMessage.from_str(role=MessageRole.USER, content=prompt))
     with st.chat_message("user"):
         st.markdown(prompt)
-    
+
     if st.session_state.messages[-1].role == MessageRole.USER:
         with st.spinner("Thinking..."):
             with st.chat_message("assistant"):

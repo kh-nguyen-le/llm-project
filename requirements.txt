@@ -2,7 +2,9 @@ requests
 dill
 pandas
 llama-index
-llama-index-llms-ollama
-llama-index-embeddings-ollama
+llama-index-embeddings-huggingface
 streamlit
 nest-asyncio
+llama-index-core
+transformers
+SQLAlchemy
